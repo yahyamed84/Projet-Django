@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Liste des Moughataas</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Nom</th>
+            <th>Wilaya</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for moughataa in moughataas %}
+        <tr>
+            <td>{{ moughataa.id }}</td>
+            <td>{{ moughataa.code }}</td>
+            <td>{{ moughataa.label }}</td>
+            <td>{{ moughataa.wilaya.name }}</td>
+            <td>
+                <a href="#" class="btn btn-warning">Modifier</a>
+                <a href="#" class="btn btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

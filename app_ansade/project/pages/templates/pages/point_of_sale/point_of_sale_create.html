@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Ajouter un Point de Vente</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Ajouter</button>
+    <a href="{% url 'point_of_sale_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

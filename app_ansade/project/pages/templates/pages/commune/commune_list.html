@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Liste des Communes</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Code</th>
+            <th>Wilaya</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for commune in communes %}
+        <tr>
+            <td>{{ commune.id }}</td>
+            <td>{{ commune.name }}</td>
+            <td>{{ commune.code }}</td>
+            <td>{{ commune.wilaya.name }}</td>
+            <td>
+                <a href="{% url 'commune_update' commune.id %}" class="btn btn-warning">Modifier</a>
+                <a href="{% url 'commune_delete' commune.id %}" class="btn btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'commune_create' %}" class="btn btn-primary">Ajouter une Commune</a>
+{% endblock %}

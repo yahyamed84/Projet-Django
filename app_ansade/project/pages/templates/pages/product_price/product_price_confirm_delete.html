@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Supprimer un Prix</h1>
+<p>Êtes-vous sûr de vouloir supprimer ce prix ?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmer</button>
+    <a href="{% url 'product_price_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

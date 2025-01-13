@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{% if form.instance.pk %}Modifier un Panier{% else %}Créer un Panier{% endif %}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Modifier{% else %}Créer{% endif %}</button>
+    <a href="{% url 'panier_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

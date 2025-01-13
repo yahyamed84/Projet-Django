@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h1>Liste des Wilayas</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Nom</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wilaya in wilayas %}
+        <tr>
+            <td>{{ wilaya.id }}</td>
+            <td>{{ wilaya.code }}</td>
+            <td>{{ wilaya.name }}</td>
+            <td>
+                <a href="#" class="btn btn-warning">Modifier</a>
+                <a href="#" class="btn btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter une Famille de Produit</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Ajouter ou Modifier une Famille de Produit</h1>
+    </header>
+    <main>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2025 ANSADE App - Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

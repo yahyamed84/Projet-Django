@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANSAD App</title>
+
+    <!-- Charger les fichiers statiques -->
+    {% load static %}
+    <!-- Inclure le fichier CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+    <!-- Vous pouvez ajouter d'autres liens ou scripts ici si nécessaire -->
+</head>
+<body>
+    <header>
+        <h1>ANSAD App</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'product_family_list' %}">Famille de produits</a></li>
+                <li><a href="{% url 'product_list' %}">Produits</a></li>
+                <li><a href="{% url 'panier_list' %}">Panier</a></li>
+                <!-- Ajoutez d'autres éléments de navigation ici -->
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenu principal -->
+    <main>
+        {% block content %}
+        <!-- Le contenu des templates enfants sera inséré ici -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ANSAD App</p>
+    </footer>
+</body>
+</html>
