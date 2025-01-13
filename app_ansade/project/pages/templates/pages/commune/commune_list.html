@@ -1,30 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Liste des Communes</h1>
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Code</th>
-            <th>Wilaya</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for commune in communes %}
-        <tr>
-            <td>{{ commune.id }}</td>
-            <td>{{ commune.name }}</td>
-            <td>{{ commune.code }}</td>
-            <td>{{ commune.wilaya.name }}</td>
-            <td>
-                <a href="{% url 'commune_update' commune.id %}" class="btn btn-warning">Modifier</a>
-                <a href="{% url 'commune_delete' commune.id %}" class="btn btn-danger">Supprimer</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'commune_create' %}" class="btn btn-primary">Ajouter une Commune</a>
+<div class="container mt-4">
+    <h2>Liste des communes</h2>
+    
+    <div class="mb-3">
+        <a href="{% url 'commune_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Créer une commune
+        </a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Nom</th>
+                <th>Moughataa</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for commune in communes %}
+            <tr>
+                <td>{{ commune.code }}</td>
+                <td>{{ commune.name }}</td>
+                <td>{{ commune.moughataa.label }}</td>
+                <td>
+                    <a href="{% url 'commune_update' commune.pk %}" class="btn btn-sm btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'commune_delete' commune.pk %}" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">Aucune commune trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
