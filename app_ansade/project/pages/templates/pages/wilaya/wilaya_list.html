@@ -1,28 +1,43 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
 {% block content %}
-<h1>Liste des Wilayas</h1>
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Code</th>
-            <th>Nom</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for wilaya in wilayas %}
-        <tr>
-            <td>{{ wilaya.id }}</td>
-            <td>{{ wilaya.code }}</td>
-            <td>{{ wilaya.name }}</td>
-            <td>
-                <a href="#" class="btn btn-warning">Modifier</a>
-                <a href="#" class="btn btn-danger">Supprimer</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h2>Liste des wilayas</h2>
+    
+    <div class="mb-3">
+        <a href="{% url 'wilaya_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Créer une wilaya
+        </a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Nom</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wilaya in wilayas %}
+            <tr>
+                <td>{{ wilaya.code }}</td>
+                <td>{{ wilaya.name }}</td>
+                <td>
+                    <a href="{% url 'wilaya_update' wilaya.pk %}" class="btn btn-sm btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'wilaya_delete' wilaya.pk %}" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Aucune wilaya trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

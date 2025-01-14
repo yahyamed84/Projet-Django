@@ -1,0 +1,52 @@
+/* Style général */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Style de la navigation */
+.navbar {
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Style des tableaux */
+.table {
+    margin-top: 1rem;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Style des boutons */
+.btn-primary {
+    margin-bottom: 1rem;
+}
+
+/* Style du footer */
+footer {
+    margin-top: 2rem;
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+    text-align: center;
+}
+
+/* Style des formulaires */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Style des messages */
+.alert {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
