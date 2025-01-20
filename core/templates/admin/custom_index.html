@@ -1,0 +1,195 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .app-group {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        transition: transform 0.2s;
+    }
+
+    .app-group:hover {
+        transform: translateY(-5px);
+    }
+
+    .app-group h2 {
+        color: #2c3e50;
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #3498db;
+        display: flex;
+        align-items: center;
+    }
+
+    .app-group h2 i {
+        margin-right: 10px;
+        color: #3498db;
+    }
+
+    .model-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .model-item {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .model-item:hover {
+        background: #e9ecef;
+    }
+
+    .model-link {
+        color: #2c3e50;
+        text-decoration: none;
+        flex-grow: 1;
+    }
+
+    .add-link {
+        background: #27ae60;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9em;
+    }
+
+    .add-link:hover {
+        background: #219a52;
+    }
+
+    .stats {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f1f8ff;
+        border-radius: 5px;
+        font-size: 0.9em;
+    }
+
+    .stats p {
+        margin: 5px 0;
+        color: #666;
+    }
+
+    .dashboard-link {
+        display: block;
+        padding: 15px;
+        margin: 20px 0;
+        background-color: #2ecc71;
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 1.2em;
+        transition: background-color 0.3s;
+    }
+    
+    .dashboard-link:hover {
+        background-color: #27ae60;
+        color: white;
+        text-decoration: none;
+    }
+
+    .dashboard-link i {
+        margin-right: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'admin:dashboard' %}" class="dashboard-link">
+    <i class="fas fa-chart-line"></i>
+    {% trans "Accéder au tableau de bord" %}
+</a>
+
+<div class="dashboard">
+    <!-- Gestion du territoire -->
+    <div class="app-group">
+        <h2><i class="fas fa-map-marked-alt"></i> Gestion du territoire</h2>
+        <ul class="model-list">
+            <li class="model-item">
+                <a href="{% url 'admin:core_wilaya_changelist' %}" class="model-link">Wilayas</a>
+                <a href="{% url 'admin:core_wilaya_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+            <li class="model-item">
+                <a href="{% url 'admin:core_moughataa_changelist' %}" class="model-link">Moughataas</a>
+                <a href="{% url 'admin:core_moughataa_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+            <li class="model-item">
+                <a href="{% url 'admin:core_commune_changelist' %}" class="model-link">Communes</a>
+                <a href="{% url 'admin:core_commune_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Gestion des produits -->
+    <div class="app-group">
+        <h2><i class="fas fa-shopping-basket"></i> Gestion des produits</h2>
+        <ul class="model-list">
+            <li class="model-item">
+                <a href="{% url 'admin:core_familleproduit_changelist' %}" class="model-link">Familles de produits</a>
+                <a href="{% url 'admin:core_familleproduit_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+            <li class="model-item">
+                <a href="{% url 'admin:core_produit_changelist' %}" class="model-link">Produits</a>
+                <a href="{% url 'admin:core_produit_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Gestion des paniers -->
+    <div class="app-group">
+        <h2><i class="fas fa-shopping-cart"></i> Gestion des paniers</h2>
+        <ul class="model-list">
+            <li class="model-item">
+                <a href="{% url 'admin:core_panierproduits_changelist' %}" class="model-link">Paniers</a>
+                <a href="{% url 'admin:core_panierproduits_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+            <li class="model-item">
+                <a href="{% url 'admin:core_produitpanier_changelist' %}" class="model-link">Produits dans panier</a>
+                <a href="{% url 'admin:core_produitpanier_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Gestion des prix -->
+    <div class="app-group">
+        <h2><i class="fas fa-tags"></i> Gestion des prix</h2>
+        <ul class="model-list">
+            <li class="model-item">
+                <a href="{% url 'admin:core_pointvente_changelist' %}" class="model-link">Points de vente</a>
+                <a href="{% url 'admin:core_pointvente_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+            <li class="model-item">
+                <a href="{% url 'admin:core_prixproduit_changelist' %}" class="model-link">Prix des produits</a>
+                <a href="{% url 'admin:core_prixproduit_add' %}" class="add-link"><i class="fas fa-plus"></i></a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

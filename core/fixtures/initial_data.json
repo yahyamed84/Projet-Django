@@ -1,0 +1,197 @@
+[
+    {
+        "model": "core.wilaya",
+        "pk": 1,
+        "fields": {
+            "nom": "Nouakchott",
+            "code": "NKC"
+        }
+    },
+    {
+        "model": "core.wilaya",
+        "pk": 2,
+        "fields": {
+            "nom": "Nouadhibou",
+            "code": "NDB"
+        }
+    },
+    {
+        "model": "core.wilaya",
+        "pk": 3,
+        "fields": {
+            "nom": "Trarza",
+            "code": "TRZ"
+        }
+    },
+    {
+        "model": "core.moughataa",
+        "pk": 1,
+        "fields": {
+            "nom": "Tevragh Zeina",
+            "code": "TZ",
+            "wilaya": 1
+        }
+    },
+    {
+        "model": "core.moughataa",
+        "pk": 2,
+        "fields": {
+            "nom": "Ksar",
+            "code": "KS",
+            "wilaya": 1
+        }
+    },
+    {
+        "model": "core.commune",
+        "pk": 1,
+        "fields": {
+            "nom": "Tevragh Zeina",
+            "code": "TZ1",
+            "moughataa": 1
+        }
+    },
+    {
+        "model": "core.commune",
+        "pk": 2,
+        "fields": {
+            "nom": "Ksar",
+            "code": "KS1",
+            "moughataa": 2
+        }
+    },
+    {
+        "model": "core.familleproduit",
+        "pk": 1,
+        "fields": {
+            "nom": "Céréales",
+            "code": "CER",
+            "description": "Produits céréaliers de base"
+        }
+    },
+    {
+        "model": "core.familleproduit",
+        "pk": 2,
+        "fields": {
+            "nom": "Légumes",
+            "code": "LEG",
+            "description": "Légumes frais"
+        }
+    },
+    {
+        "model": "core.familleproduit",
+        "pk": 3,
+        "fields": {
+            "nom": "Viandes",
+            "code": "VIA",
+            "description": "Viandes et volailles"
+        }
+    },
+    {
+        "model": "core.produit",
+        "pk": 1,
+        "fields": {
+            "code": "RIZ-001",
+            "nom": "Riz brisé",
+            "description": "Riz brisé importé",
+            "unite_mesure": "kg",
+            "famille": 1,
+            "date_creation": "2025-01-20T00:00:00Z"
+        }
+    },
+    {
+        "model": "core.produit",
+        "pk": 2,
+        "fields": {
+            "code": "POM-001",
+            "nom": "Pommes de terre",
+            "description": "Pommes de terre fraîches",
+            "unite_mesure": "kg",
+            "famille": 2,
+            "date_creation": "2025-01-20T00:00:00Z"
+        }
+    },
+    {
+        "model": "core.produit",
+        "pk": 3,
+        "fields": {
+            "code": "VIA-001",
+            "nom": "Viande de boeuf",
+            "description": "Viande de boeuf fraîche",
+            "unite_mesure": "kg",
+            "famille": 3,
+            "date_creation": "2025-01-20T00:00:00Z"
+        }
+    },
+    {
+        "model": "core.pointvente",
+        "pk": 1,
+        "fields": {
+            "nom": "Big Market",
+            "commune": 1,
+            "latitude": "18.0735",
+            "longitude": "-15.9582",
+            "adresse": "Avenue Charles de Gaulle",
+            "date_creation": "2024-01-20T12:00:00Z"
+        }
+    },
+    {
+        "model": "core.pointvente",
+        "pk": 2,
+        "fields": {
+            "nom": "Etak El Khair Soukouk 1",
+            "commune": 1,
+            "latitude": "18.0825",
+            "longitude": "-15.9672",
+            "adresse": "Rue de l'Espoir",
+            "date_creation": "2024-01-20T12:00:00Z"
+        }
+    },
+    {
+        "model": "core.pointvente",
+        "pk": 3,
+        "fields": {
+            "nom": "Moujemaa Beyt",
+            "commune": 2,
+            "latitude": "18.0645",
+            "longitude": "-15.9492",
+            "adresse": "Avenue de l'Indépendance",
+            "date_creation": "2024-01-20T12:00:00Z"
+        }
+    },
+    {
+        "model": "core.pointvente",
+        "pk": 4,
+        "fields": {
+            "nom": "Complexe El Vadel",
+            "commune": 2,
+            "latitude": "18.0915",
+            "longitude": "-15.9482",
+            "adresse": "Rue du Marché",
+            "date_creation": "2024-01-20T12:00:00Z"
+        }
+    },
+    {
+        "model": "core.pointvente",
+        "pk": 5,
+        "fields": {
+            "nom": "Bana Blanc",
+            "commune": 3,
+            "latitude": "18.0635",
+            "longitude": "-15.9782",
+            "adresse": "Avenue du Port",
+            "date_creation": "2024-01-20T12:00:00Z"
+        }
+    },
+    {
+        "model": "core.pointvente",
+        "pk": 6,
+        "fields": {
+            "nom": "Mega Market",
+            "commune": 3,
+            "latitude": "18.0835",
+            "longitude": "-15.9382",
+            "adresse": "Boulevard Maritime",
+            "date_creation": "2024-01-20T12:00:00Z"
+        }
+    }
+]

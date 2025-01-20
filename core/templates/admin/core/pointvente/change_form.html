@@ -1,0 +1,118 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<style>
+    #map {
+        height: 400px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .coordinates-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .coordinates-box label {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    .map-instructions {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #e9ecef;
+        border-radius: 5px;
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block field_sets %}
+<div class="map-instructions">
+    <p>{% trans "Pour sélectionner un emplacement :" %}</p>
+    <ul>
+        <li>{% trans "Cliquez sur la carte pour définir le point de vente" %}</li>
+        <li>{% trans "Ou entrez directement les coordonnées dans les champs latitude/longitude" %}</li>
+        <li>{% trans "Utilisez les boutons + et - pour zoomer/dézoomer" %}</li>
+        <li>{% trans "Maintenez le clic gauche pour déplacer la carte" %}</li>
+    </ul>
+</div>
+
+<div id="map"></div>
+
+<div class="coordinates-box">
+    <div class="row">
+        <div class="col-md-6">
+            <label for="id_latitude">{% trans "Latitude" %}:</label>
+            <input type="number" id="id_latitude" step="any" class="form-control" value="{{ original.latitude|default:'' }}">
+        </div>
+        <div class="col-md-6">
+            <label for="id_longitude">{% trans "Longitude" %}:</label>
+            <input type="number" id="id_longitude" step="any" class="form-control" value="{{ original.longitude|default:'' }}">
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation de la carte centrée sur la Mauritanie
+        var map = L.map('map').setView([18.0735, -15.9582], 7);
+        
+        // Ajout du fond de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var marker;
+        
+        // Fonction pour mettre à jour le marqueur et les champs
+        function updateLocation(lat, lng) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([lat, lng]).addTo(map);
+            document.getElementById('id_latitude').value = lat.toFixed(6);
+            document.getElementById('id_longitude').value = lng.toFixed(6);
+        }
+
+        // Gestion du clic sur la carte
+        map.on('click', function(e) {
+            updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Gestion des changements manuels des coordonnées
+        document.getElementById('id_latitude').addEventListener('change', function() {
+            var lat = parseFloat(this.value);
+            var lng = parseFloat(document.getElementById('id_longitude').value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                updateLocation(lat, lng);
+                map.setView([lat, lng]);
+            }
+        });
+
+        document.getElementById('id_longitude').addEventListener('change', function() {
+            var lat = parseFloat(document.getElementById('id_latitude').value);
+            var lng = parseFloat(this.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                updateLocation(lat, lng);
+                map.setView([lat, lng]);
+            }
+        });
+
+        // Si on a déjà des coordonnées (en mode édition), on les affiche
+        var initialLat = document.getElementById('id_latitude').value;
+        var initialLng = document.getElementById('id_longitude').value;
+        if (initialLat && initialLng) {
+            updateLocation(parseFloat(initialLat), parseFloat(initialLng));
+            map.setView([parseFloat(initialLat), parseFloat(initialLng)], 13);
+        }
+    });
+</script>
+{% endblock %}

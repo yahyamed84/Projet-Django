@@ -1,0 +1,112 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Administration des données INPC{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: #2c3e50;
+        --secondary: #3498db;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+
+    #header {
+        background: linear-gradient(135deg, var(--primary), #34495e);
+        color: white;
+        padding: 15px 20px;
+    }
+
+    #site-name a {
+        color: white;
+        font-weight: 600;
+        font-size: 20px;
+        text-decoration: none;
+    }
+
+    .module {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .module h2 {
+        background: var(--primary);
+        color: white;
+        padding: 15px;
+        margin: 0;
+        border-radius: 8px 8px 0 0;
+        font-size: 16px;
+    }
+
+    .module table {
+        width: 100%;
+    }
+
+    .addlink {
+        background: #27ae60;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px;
+    }
+
+    .addlink:hover {
+        background: #219a52;
+        text-decoration: none;
+        color: white;
+    }
+
+    /* Masquer la navigation latérale */
+    #nav-sidebar {
+        display: none !important;
+    }
+
+    /* Étendre le contenu principal */
+    #content {
+        margin-left: 0 !important;
+        padding: 20px !important;
+    }
+
+    /* Style du footer */
+    #footer {
+        background: var(--primary);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        font-size: 14px;
+    }
+
+    /* Ajouter de l'espace pour le footer fixe */
+    #content {
+        margin-bottom: 60px;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        Administration des données INPC
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+<div id="footer">
+    2024-2025 Tous droits réservés (23084)
+</div>
+{% endblock %}

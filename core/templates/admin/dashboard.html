@@ -1,0 +1,158 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .stat-card h3 {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin: 0.5rem 0;
+    }
+    .filters {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+    .filter-group select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    #map {
+        height: 500px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="filters">
+    <form id="filter-form" method="get">
+        <div class="filter-group">
+            <label>Wilaya</label>
+            <select name="wilaya" onchange="this.form.submit()">
+                <option value="all">Toutes les wilayas</option>
+                {% for wilaya in wilayas %}
+                <option value="{{ wilaya.id }}" {% if selected_wilaya == wilaya.id|stringformat:"s" %}selected{% endif %}>
+                    {{ wilaya.nom }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Période</label>
+            <select name="periode" onchange="this.form.submit()">
+                <option value="7" {% if selected_periode == "7" %}selected{% endif %}>7 derniers jours</option>
+                <option value="30" {% if selected_periode == "30" %}selected{% endif %}>30 derniers jours</option>
+                <option value="90" {% if selected_periode == "90" %}selected{% endif %}>90 derniers jours</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Famille de produits</label>
+            <select name="famille" onchange="this.form.submit()">
+                <option value="all">Toutes les familles</option>
+                {% for famille in familles %}
+                <option value="{{ famille.id }}" {% if selected_famille == famille.id|stringformat:"s" %}selected{% endif %}>
+                    {{ famille.nom }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <h3>Produits</h3>
+        <div class="number">{{ produits_count }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Points de vente</h3>
+        <div class="number">{{ points_vente_count }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Prix relevés</h3>
+        <div class="number">{{ prix_count }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Prix relevés aujourd'hui</h3>
+        <div class="number">{{ prix_aujourdhui_count }}</div>
+    </div>
+</div>
+
+<h2>Points de vente</h2>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser la carte centrée sur Nouakchott
+        var map = L.map('map').setView([18.0735, -15.9582], 12);
+        
+        // Ajouter le fond de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Récupérer les points de vente depuis le contexte Django
+        var pointsVente = {{ points_vente_json|safe }};
+        var markers = [];
+        
+        // Ajouter les marqueurs pour chaque point de vente
+        pointsVente.forEach(function(point) {
+            var marker = L.marker([point.lat, point.lng]).addTo(map);
+            markers.push(marker);
+            
+            // Ajouter une popup avec les informations du point
+            marker.bindPopup(
+                '<strong>' + point.nom + '</strong><br>' +
+                'Adresse: ' + point.adresse + '<br>' +
+                'Commune: ' + point.commune + '<br>' +
+                'Moughataa: ' + point.moughataa + '<br>' +
+                'Wilaya: ' + point.wilaya
+            );
+        });
+
+        // Si des points existent, ajuster la vue pour les inclure tous
+        if (markers.length > 0) {
+            var group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    });
+</script>
+{% endblock %}
