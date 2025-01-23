@@ -1,23 +1,23 @@
 version: '3.8'
 
 services:
-  djangoapp24084:
+  djangoapp23084:
     build: .
-    command: python manage.py runserver 0.0.0.0:25084
+    command: python manage.py runserver 0.0.0.0:23084
     volumes:
       - .:/app
     ports:
-      - "25084:25084"
+      - "23084:23084"
     depends_on:
-      - mydb24084
+      - mydb23084
     environment:
       - POSTGRES_NAME=inpc_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=mydb24084
+      - POSTGRES_HOST=mydb23084
       - POSTGRES_PORT=5432
 
-  mydb24084:
+  mydb23084:
     image: postgis/postgis:13-3.1
     volumes:
       - postgres_data:/var/lib/postgresql/data
