@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.shortcuts import redirect
 from core.admin import admin_site
 
@@ -23,6 +23,6 @@ def redirect_to_admin(request):
     return redirect('admin:index')
 
 urlpatterns = [
-    path('', redirect_to_admin),
     path('admin/', admin_site.urls),
+    path('', include('core.urls')),
 ]
