@@ -140,25 +140,21 @@ class ProduitPanierInline(admin.TabularInline):
     fields = ['produit', 'ponderation', 'date_debut', 'date_fin']
 
 @admin.register(PanierProduits, site=admin_site)
-class PanierProduitsAdmin(ImportExportModelAdmin):
+class PanierProduitsAdmin(admin.ModelAdmin):
     list_display = ('nom', 'date_creation', 'get_produits_count')
     search_fields = ('nom',)
-    readonly_fields = ('date_creation',)
     inlines = [ProduitPanierInline]
-
+    
     def get_produits_count(self, obj):
         return obj.produits.count()
     get_produits_count.short_description = 'Nombre de produits'
 
 @admin.register(ProduitPanier, site=admin_site)
-class ProduitPanierAdmin(ImportExportModelAdmin):
+class ProduitPanierAdmin(admin.ModelAdmin):
     list_display = ('panier', 'produit', 'ponderation', 'date_debut', 'date_fin')
     list_filter = ('panier', 'produit')
     search_fields = ('panier__nom', 'produit__nom')
     autocomplete_fields = ['panier', 'produit']
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('panier', 'produit')
 
 @admin.register(PointVente, site=admin_site)
 class PointVenteAdmin(ImportExportModelAdmin):

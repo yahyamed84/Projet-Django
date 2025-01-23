@@ -121,21 +121,23 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-# Configuration des fichiers statiques
+STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'core' / 'static',
 ]
 
-# URL prefix pour les fichiers statiques
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Désactiver la collection des fichiers statiques
+STATIC_ROOT = None
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuration de l'authentification
+LOGIN_URL = 'core:login'
+LOGIN_REDIRECT_URL = 'admin:index'
+LOGOUT_REDIRECT_URL = 'core:login'
 
 # Configuration Leaflet
 LEAFLET_CONFIG = {
@@ -148,4 +150,29 @@ LEAFLET_CONFIG = {
             'attribution': '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }),
     ],
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }

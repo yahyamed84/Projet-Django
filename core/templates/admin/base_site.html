@@ -5,15 +5,14 @@
 
 {% block extrastyle %}
 <link rel="stylesheet" href="{% static 'css/admin.css' %}">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     :root {
         --primary: #2c3e50;
         --secondary: #3498db;
     }
 
-    body {
-        font-family: 'Inter', sans-serif;
+    body, h1, h2, h3, h4, h5, h6, p, a, button, input, select, textarea, table, div, span {
+        font-family: "Trebuchet MS", sans-serif !important;
     }
 
     #header {
@@ -92,6 +91,23 @@
     #content {
         margin-bottom: 60px;
     }
+
+    /* Forcer Trebuchet MS pour tous les éléments de l'interface admin */
+    .submit-row input,
+    .button, input[type=submit], input[type=button],
+    .object-tools a,
+    #changelist-filter h2,
+    #changelist-filter a,
+    .paginator,
+    .help,
+    .form-row label,
+    .form-row p,
+    .errorlist,
+    .messagelist,
+    #user-tools,
+    .breadcrumbs {
+        font-family: "Trebuchet MS", sans-serif !important;
+    }
 </style>
 {% endblock %}
 
@@ -101,6 +117,22 @@
         Administration des données INPC
     </a>
 </h1>
+{% endblock %}
+
+{% block userlinks %}
+    {% if site_url %}
+        <a href="{% url 'core:home' %}">Voir le site INPC</a> /
+    {% endif %}
+    {% if user.is_active and user.is_staff %}
+        {% url 'django-admindocs-docroot' as docsroot %}
+        {% if docsroot %}
+            <a href="{{ docsroot }}">Documentation</a> /
+        {% endif %}
+    {% endif %}
+    {% if user.has_usable_password %}
+        <a href="{% url 'admin:password_change' %}">Changer le mot de passe</a> /
+    {% endif %}
+    <a href="{% url 'admin:logout' %}">Se déconnecter</a>
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
