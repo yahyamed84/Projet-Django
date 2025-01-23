@@ -3,11 +3,11 @@ version: '3.8'
 services:
   djangoapp23084:
     build: .
-    command: python manage.py runserver 0.0.0.0:23084
+    command: python manage.py runserver 0.0.0.0:25084
     volumes:
       - .:/app
     ports:
-      - "23084:23084"
+      - "25084:25084"
     depends_on:
       - mydb23084
     environment:
