@@ -19,10 +19,8 @@ from django.urls import path, include
 from django.shortcuts import redirect
 from core.admin import admin_site
 
-def redirect_to_admin(request):
-    return redirect('admin:index')
-
 urlpatterns = [
+    path('', lambda request: redirect('admin/', permanent=True)),
     path('admin/', admin_site.urls),
-    path('', include('core.urls')),
+    path('core/', include('core.urls')),
 ]

@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from django.http import JsonResponse
-from django.db.models import Count, Avg, Q
+from django.db.models import Count, Avg, Q, Sum, Max
 from django.utils import timezone
 from datetime import timedelta, datetime
 from .models import (
@@ -11,8 +11,11 @@ from .models import (
 )
 from .forms import PointVenteForm
 import json
-
-# Create your views here.
+import plotly.graph_objects as go
+import plotly.express as px
+from django.db.models.functions import TruncMonth
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 @method_decorator(staff_member_required, name='dispatch')
 class DashboardView(TemplateView):
@@ -78,6 +81,7 @@ class DashboardView(TemplateView):
 
         return context
 
+@staff_member_required
 def dashboard_data(request):
     # Récupération des filtres
     wilaya_id = request.GET.get('wilaya')
@@ -135,63 +139,125 @@ def dashboard_data(request):
         'points_vente': points_data
     })
 
+@method_decorator(staff_member_required, name='dispatch')
 class INPCHomeView(TemplateView):
     template_name = 'core/inpc_home.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Récupérer les 4 derniers mois d'INPC
-        context['inpc_list'] = INPC.objects.order_by('-mois')[:4]
-        
-        # Si nous n'avons pas d'INPC pour le mois en cours, le calculer
-        mois_actuel = timezone.now().date().replace(day=1)
-        if not INPC.objects.filter(mois=mois_actuel).exists():
-            try:
-                INPC.calculer_inpc(mois_actuel)
-                # Rafraîchir la liste après le calcul
-                context['inpc_list'] = INPC.objects.order_by('-mois')[:4]
-            except Exception as e:
-                context['error_message'] = str(e)
-        
-        # Ajouter les années et mois pour le formulaire de calcul
-        annee_courante = timezone.now().year
-        context['annees'] = list(range(annee_courante, annee_courante - 5, -1))
-        context['mois'] = [
+        # Ajouter les années et mois pour le formulaire
+        current_year = timezone.now().year
+        context['years'] = range(current_year - 5, current_year + 1)
+        context['months'] = [
             (1, 'Janvier'), (2, 'Février'), (3, 'Mars'),
             (4, 'Avril'), (5, 'Mai'), (6, 'Juin'),
             (7, 'Juillet'), (8, 'Août'), (9, 'Septembre'),
             (10, 'Octobre'), (11, 'Novembre'), (12, 'Décembre')
         ]
-            
+        
+        # Récupérer les 4 derniers INPC uniques par mois
+        latest_inpcs = INPC.objects.values('mois').annotate(
+            max_id=Max('id'),
+            latest_valeur=Max('valeur'),
+            latest_date=Max('date_calcul')
+        ).order_by('-mois')[:4]
+        
+        context['inpc_list'] = [
+            {
+                'mois': item['mois'],
+                'valeur': item['latest_valeur'],
+                'date_calcul': item['latest_date']
+            } for item in latest_inpcs
+        ]
+        
+        # Récupérer les données INPC des 12 derniers mois
+        last_12_months = timezone.now() - timedelta(days=365)
+        inpc_data = INPC.objects.filter(
+            mois__gte=last_12_months
+        ).values('mois').annotate(
+            valeur=Max('valeur')
+        ).order_by('mois')
+
+        # Line Chart - Evolution de l'INPC
+        line_chart = go.Figure()
+        line_chart.add_trace(go.Scatter(
+            x=[item['mois'] for item in inpc_data],
+            y=[item['valeur'] for item in inpc_data],
+            mode='lines+markers',
+            name='INPC'
+        ))
+        line_chart.update_layout(
+            title='Evolution de l\'INPC sur 12 mois',
+            xaxis_title='Mois',
+            yaxis_title='Valeur INPC',
+            template='plotly_white'
+        )
+        
+        # Bar Chart - INPC par mois
+        bar_data = INPC.objects.values('mois').annotate(
+            avg_value=Max('valeur')
+        ).order_by('-mois')[:6]
+        
+        bar_chart = go.Figure()
+        bar_chart.add_trace(go.Bar(
+            x=[item['mois'].strftime('%B %Y') for item in bar_data],
+            y=[item['avg_value'] for item in bar_data],
+            name='INPC Mensuel'
+        ))
+        bar_chart.update_layout(
+            title='INPC Moyen par Mois',
+            xaxis_title='Mois',
+            yaxis_title='INPC Moyen',
+            template='plotly_white'
+        )
+
+        # Pie Chart - Répartition par Famille de Produits
+        produits_data = ProduitPanier.objects.values(
+            'produit__famille__nom'
+        ).annotate(
+            total_ponderation=Sum('ponderation')
+        ).order_by('-total_ponderation')
+
+        pie_chart = go.Figure(data=[go.Pie(
+            labels=[item['produit__famille__nom'] for item in produits_data],
+            values=[item['total_ponderation'] for item in produits_data],
+            hole=.3
+        )])
+        pie_chart.update_layout(
+            title='Répartition des Pondérations par Famille de Produits',
+            template='plotly_white'
+        )
+
+        # Convert charts to HTML
+        context['line_chart'] = line_chart.to_html(full_html=False)
+        context['bar_chart'] = bar_chart.to_html(full_html=False)
+        context['pie_chart'] = pie_chart.to_html(full_html=False)
+        
         return context
 
     def post(self, request, *args, **kwargs):
         try:
-            annee = int(request.POST.get('annee'))
-            mois = int(request.POST.get('mois'))
-            date_calcul = timezone.datetime(annee, mois, 1).date()
+            year = int(request.POST.get('year'))
+            month = int(request.POST.get('month'))
+            date = datetime(year, month, 1).date()
             
-            inpc = INPC.calculer_inpc(date_calcul)
-            
+            inpc = INPC.calculer_inpc(date)
             return JsonResponse({
                 'success': True,
-                'mois': date_calcul.strftime('%B %Y'),
-                'valeur': float(inpc.valeur)
-            })
-            
-        except ValueError as e:
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
+                'inpc': {
+                    'mois': inpc.mois.strftime('%B %Y'),
+                    'valeur': float(inpc.valeur),
+                    'date_calcul': inpc.date_calcul.strftime('%d/%m/%Y')
+                }
             })
         except Exception as e:
             return JsonResponse({
                 'success': False,
-                'error': f"Une erreur s'est produite lors du calcul : {str(e)}"
+                'error': str(e)
             })
 
-@staff_member_required
+@login_required
 def calculer_inpc_mois(request):
     """Vue pour calculer l'INPC d'un mois spécifique"""
     try:
