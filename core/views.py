@@ -16,6 +16,7 @@ import plotly.express as px
 from django.db.models.functions import TruncMonth
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.contrib.auth.views import LoginView
 
 @method_decorator(staff_member_required, name='dispatch')
 class DashboardView(TemplateView):
@@ -276,6 +277,13 @@ def calculer_inpc_mois(request):
             'success': False,
             'error': str(e)
         })
+
+class CustomLoginView(LoginView):
+    template_name = 'core/login.html'
+    success_url = '/admin/'
+    
+    def get_success_url(self):
+        return self.success_url
 
 @method_decorator(staff_member_required, name='dispatch')
 class ProduitPanierCreateView(CreateView):

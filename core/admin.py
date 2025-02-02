@@ -11,9 +11,10 @@ from .models import (
     Wilaya, Moughataa, Commune,
     FamilleProduit, Produit,
     PanierProduits, ProduitPanier,
-    PointVente, PrixProduit
+    PointVente, PrixProduit, INPC
 )
 from .forms import PointVenteForm
+from django.contrib import messages
 
 class CustomAdminSite(AdminSite):
     site_header = 'Administration des données INPC'
@@ -151,10 +152,10 @@ class PanierProduitsAdmin(admin.ModelAdmin):
 
 @admin.register(ProduitPanier, site=admin_site)
 class ProduitPanierAdmin(admin.ModelAdmin):
-    list_display = ('panier', 'produit', 'ponderation', 'date_debut', 'date_fin')
-    list_filter = ('panier', 'produit')
-    search_fields = ('panier__nom', 'produit__nom')
-    autocomplete_fields = ['panier', 'produit']
+    list_display = ('produit', 'panier', 'ponderation', 'date_debut', 'date_fin')
+    list_filter = ('panier', 'produit', 'date_debut')
+    search_fields = ('produit__nom', 'panier__nom')
+    date_hierarchy = 'date_debut'
 
 @admin.register(PointVente, site=admin_site)
 class PointVenteAdmin(ImportExportModelAdmin):
@@ -184,24 +185,44 @@ class PointVenteAdmin(ImportExportModelAdmin):
 @admin.register(PrixProduit, site=admin_site)
 class PrixProduitAdmin(ImportExportModelAdmin):
     resource_class = PrixProduitResource
-    list_display = ('produit', 'point_vente', 'prix', 'date_releve', 'date_saisie', 'statut')
-    list_filter = ('produit', 'point_vente', 'date_releve', 'statut')
+    list_display = ('produit', 'point_vente', 'prix', 'date_releve', 'statut')
+    list_filter = ('statut', 'date_releve', 'point_vente__commune__moughataa__wilaya')
     search_fields = ('produit__nom', 'point_vente__nom')
     date_hierarchy = 'date_releve'
-    autocomplete_fields = ['produit', 'point_vente']
     readonly_fields = ('date_saisie',)
-    actions = ['valider_prix', 'rejeter_prix']
+    
+    def save_model(self, request, obj, form, change):
+        """
+        Surcharge de la méthode de sauvegarde pour gérer le recalcul de l'INPC
+        """
+        # Sauvegarder le statut actuel avant modification
+        ancien_statut = None
+        if change:  # Si c'est une modification
+            ancien_obj = self.model.objects.get(pk=obj.pk)
+            ancien_statut = ancien_obj.statut
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('produit', 'point_vente')
+        # Sauvegarder l'objet
+        super().save_model(request, obj, form, change)
 
-    def valider_prix(self, request, queryset):
-        queryset.update(statut='validé')
-    valider_prix.short_description = "Valider les prix sélectionnés"
-
-    def rejeter_prix(self, request, queryset):
-        queryset.update(statut='rejeté')
-    rejeter_prix.short_description = "Rejeter les prix sélectionnés"
+        # Si le statut passe à 'validé', recalculer l'INPC
+        if obj.statut == 'validé' and ancien_statut != 'validé':
+            mois_prix = obj.date_releve.date().replace(day=1)
+            try:
+                # Supprimer l'ancien INPC pour ce mois
+                INPC.objects.filter(mois=mois_prix).delete()
+                # Recalculer l'INPC
+                INPC.calculer_inpc(mois_prix)
+                self.message_user(
+                    request,
+                    f"L'INPC a été recalculé pour le mois de {mois_prix.strftime('%B %Y')}",
+                    messages.SUCCESS
+                )
+            except Exception as e:
+                self.message_user(
+                    request,
+                    f"Erreur lors du recalcul de l'INPC : {str(e)}",
+                    messages.ERROR
+                )
 
 # Template personnalisé pour la page d'accueil
 admin_site.index_template = 'admin/custom_index.html'

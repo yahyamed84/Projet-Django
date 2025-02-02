@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Wilaya(models.Model):
     nom = models.CharField(max_length=100, unique=True)
@@ -83,7 +85,7 @@ class ProduitPanier(models.Model):
     panier = models.ForeignKey(PanierProduits, on_delete=models.CASCADE, null=True, blank=True)
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     ponderation = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)
-    date_debut = models.DateField(auto_now_add=True)
+    date_debut = models.DateField(default=timezone.now)
     date_fin = models.DateField(null=True, blank=True)
 
     class Meta:
@@ -138,6 +140,24 @@ class PrixProduit(models.Model):
             models.Index(fields=['produit', 'date_releve']),
         ]
 
+@receiver(post_save, sender=PrixProduit)
+def recalculer_inpc_apres_modification_prix(sender, instance, created, **kwargs):
+    """
+    Signal pour recalculer l'INPC lorsqu'un prix est modifié ou créé
+    """
+    if instance.statut == 'validé':
+        # Récupérer le mois du prix modifié
+        mois_prix = instance.date_releve.date().replace(day=1)
+        try:
+            # Supprimer l'ancien INPC pour ce mois s'il existe
+            INPC.objects.filter(mois=mois_prix).delete()
+            # Recalculer l'INPC pour ce mois
+            INPC.calculer_inpc(mois_prix)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erreur lors du recalcul de l'INPC : {str(e)}")
+
 class INPC(models.Model):
     mois = models.DateField(verbose_name="Mois de calcul")
     valeur = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valeur de l'INPC")
@@ -166,7 +186,7 @@ class INPC(models.Model):
         if inpc_existant:
             return inpc_existant
         
-        # Récupérer tous les prix validés du mois
+        # Définir la période de calcul
         debut_mois = mois
         fin_mois = (mois.replace(day=28) + timezone.timedelta(days=4)).replace(day=1) - timezone.timedelta(days=1)
         
@@ -179,7 +199,7 @@ class INPC(models.Model):
             
         logger.info(f"Utilisation du panier : {panier.nom}")
         
-        # Calculer la moyenne pondérée des variations de prix
+        # Calculer la moyenne pondérée des prix
         somme_ponderee = 0
         poids_total = 0
         produits_sans_prix = []
@@ -191,21 +211,34 @@ class INPC(models.Model):
         
         logger.info(f"Nombre de produits dans le panier : {produits_panier.count()}")
         
-        # D'abord, trouvons les derniers prix validés pour chaque produit
         for produit_panier in produits_panier:
-            # Chercher le dernier prix validé pour ce produit
-            dernier_prix = PrixProduit.objects.filter(
+            # Chercher le prix validé pour ce produit dans le mois spécifié
+            prix_mois = PrixProduit.objects.filter(
                 produit=produit_panier.produit,
-                statut='validé'
+                statut='validé',
+                date_releve__gte=debut_mois,
+                date_releve__lte=fin_mois
             ).order_by('-date_releve').first()
             
-            if dernier_prix:
-                logger.info(f"Produit {produit_panier.produit.nom}: Utilisation du dernier prix validé = {dernier_prix.prix} du {dernier_prix.date_releve}")
-                somme_ponderee += dernier_prix.prix * produit_panier.ponderation
+            if prix_mois:
+                logger.info(f"Produit {produit_panier.produit.nom}: Prix du mois = {prix_mois.prix} du {prix_mois.date_releve}")
+                somme_ponderee += prix_mois.prix * produit_panier.ponderation
                 poids_total += produit_panier.ponderation
             else:
-                produits_sans_prix.append(produit_panier.produit.nom)
-                logger.warning(f"Aucun prix validé trouvé pour le produit {produit_panier.produit.nom}")
+                # Si pas de prix pour ce mois, chercher le dernier prix validé avant ce mois
+                dernier_prix = PrixProduit.objects.filter(
+                    produit=produit_panier.produit,
+                    statut='validé',
+                    date_releve__lt=debut_mois
+                ).order_by('-date_releve').first()
+                
+                if dernier_prix:
+                    logger.info(f"Produit {produit_panier.produit.nom}: Utilisation du dernier prix connu = {dernier_prix.prix} du {dernier_prix.date_releve}")
+                    somme_ponderee += dernier_prix.prix * produit_panier.ponderation
+                    poids_total += produit_panier.ponderation
+                else:
+                    produits_sans_prix.append(produit_panier.produit.nom)
+                    logger.warning(f"Aucun prix validé trouvé pour le produit {produit_panier.produit.nom}")
         
         logger.info(f"Somme pondérée totale : {somme_ponderee}")
         logger.info(f"Poids total : {poids_total}")
