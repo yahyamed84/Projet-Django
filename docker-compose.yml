@@ -3,11 +3,18 @@ version: '3.8'
 services:
   djangoapp23084:
     build: .
-    command: python manage.py runserver 0.0.0.0:25084
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:25084"
     volumes:
       - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
-      - "25084:25084"
+      - "0.0.0.0:25084:25084"
+    expose:
+      - "25084"
     depends_on:
       - mydb23084
     environment:
@@ -16,6 +23,8 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=mydb23084
       - POSTGRES_PORT=5432
+    networks:
+      - web_network
 
   mydb23084:
     image: postgis/postgis:13-3.1
@@ -26,7 +35,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "24084:5432
+      - "24084:5432"
+    networks:
+      - web_network
 
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  web_network:
+    driver: bridge

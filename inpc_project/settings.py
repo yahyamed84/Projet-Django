@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-x@@&e)&*qredn8@8#dzf=uh*6ndv&2wu*#*p!m(^s7e&&&go6l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', 'teaching.sidi.xyz']
 
 # Login settings
 LOGIN_URL = 'core:login'
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'import_export',
     'core',
+    'django.contrib.gis',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -87,8 +88,12 @@ WSGI_APPLICATION = 'inpc_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.environ.get('POSTGRES_NAME', 'inpc_db'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'mydb23084'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
 
@@ -130,8 +135,12 @@ STATICFILES_DIRS = [
     BASE_DIR / 'core' / 'static',
 ]
 
-# Désactiver la collection des fichiers statiques
-STATIC_ROOT = None
+# Configure STATIC_ROOT for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -175,3 +184,10 @@ LOGGING = {
         },
     },
 }
+
+CSRF_TRUSTED_ORIGINS=[
+    'http://138.201.52.29:25217',
+    'http://teaching.sidi.xyz:25217',
+    'http://localhost:23217'
+
+]
